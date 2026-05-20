@@ -1,0 +1,26 @@
+{
+  "id": "grocery",
+  "name": "Grocery List",
+  "version": "1.0.0",
+  "description": "A shared household grocery list. Anyone can add items; adults check things off. Items are alphabetical and automatically deduplicated.",
+  "entrypoint": "index.html",
+  "runtime": "static",
+  "storage": "db",
+  "category": "family",
+  "tags": ["grocery", "shopping", "list", "household"],
+  "nav": { "label": "Groceries", "icon": "🛒" },
+  "widget": { "label": "Groceries", "size": "small" },
+  "data_access": {
+    "reads": ["family.members"],
+    "writes": []
+  },
+  "permissions": {
+    "default_audience": "everyone",
+    "requires_approval": false
+  },
+  "resource_limits": {
+    "max_store_bytes": 262144,
+    "max_store_reads_per_day": 1000,
+    "max_store_writes_per_day": 500
+  }
+}

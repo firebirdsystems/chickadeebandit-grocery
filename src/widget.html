@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Groceries Widget</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--hub-font, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+      font-size: 13px;
+      background: #fff;
+      color: #111827;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px 8px; border-bottom: 1px solid #e5e7eb; flex-shrink: 0;
+    }
+    .header-count { font-size: 11px; color: #6b7280; }
+
+    /* ── Add bar ── */
+    .add-bar {
+      display: flex; gap: 6px; padding: 7px 10px 6px;
+      border-bottom: 1px solid #f3f4f6; flex-shrink: 0;
+    }
+    .add-input {
+      flex: 1; border: 1px solid #d1d5db; border-radius: 6px;
+      padding: 4px 9px; font-size: 12px; font-family: inherit; outline: none;
+      transition: border-color .12s;
+    }
+    .add-input:focus { border-color: #111827; }
+    .add-btn {
+      padding: 4px 12px; background: #111827; color: #fff; border: none;
+      border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .add-btn:hover { background: #374151; }
+
+    /* ── Item list ── */
+    .item-list { flex: 1; overflow-y: auto; }
+
+    .item-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 14px; border-bottom: 1px solid #f3f4f6;
+    }
+    .item-row:last-child { border-bottom: none; }
+
+    .bullet {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #111827; flex-shrink: 0;
+    }
+    .item-name { flex: 1; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ── Footer ── */
+    .footer {
+      padding: 6px 14px; border-top: 1px solid #e5e7eb;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0; background: #f9fafb;
+    }
+    .open-link { font-size: 11px; font-weight: 600; color: #111827; text-decoration: none; }
+    .open-link:hover { text-decoration: underline; }
+
+    .empty {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: #9ca3af; font-size: 12px; gap: 4px;
+    }
+  </style>
+</head>
+<body>
+<script type="module">
+import { normalizeItem, isDuplicate } from "./logic.js";
+import { esc } from "/hub-sdk.js";
+
+const CONTEXT    = window.__CONTEXT_URL ?? "";
+const DB         = window.__DB_URL      ?? "";
+const APP_ID     = window.__APP_ID      ?? "grocery";
+const HUB_MEMBER = window.__CURRENT_MEMBER ?? null;
+
+let items = [];
+
+async function dbq(sql, params = []) {
+  if (!DB) return { rows: [] };
+  const res = await fetch(DB, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ sql, params }),
+  });
+  const json = await res.json();
+  if (json.error) throw new Error(json.error);
+  return json;
+}
+
+async function setup() {
+  await dbq(`CREATE TABLE IF NOT EXISTS items (
+    id TEXT PRIMARY KEY, name TEXT NOT NULL, name_normalized TEXT NOT NULL,
+    added_by_id TEXT NOT NULL, added_by_name TEXT NOT NULL,
+    checked INTEGER NOT NULL DEFAULT 0, checked_by_name TEXT,
+    created_at TEXT NOT NULL, UNIQUE(name_normalized)
+  )`);
+}
+
+async function load() {
+  const { rows } = await dbq(`SELECT * FROM items WHERE checked = 0 ORDER BY name ASC`);
+  items = rows;
+  render();
+}
+
+async function addItem(name) {
+  const trimmed = name.trim();
+  if (!trimmed) return;
+  if (isDuplicate(items, trimmed)) return; // silently skip in widget
+  const authorId   = HUB_MEMBER?.id   ?? "widget";
+  const authorName = HUB_MEMBER?.name ?? "Someone";
+  try {
+    await dbq(
+      `INSERT INTO items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at)
+       VALUES (?, ?, ?, ?, ?, 0, ?)`,
+      [crypto.randomUUID(), trimmed, normalizeItem(trimmed),
+       authorId, authorName, new Date().toISOString()]
+    );
+    await load();
+  } catch { /* duplicate or other error — ignore in widget */ }
+}
+
+function render() {
+  const header = `
+    <div class="header">
+      <span class="header-count">${items.length} item${items.length !== 1 ? "s" : ""} to get</span>
+    </div>`;
+
+  const addBar = `
+    <div class="add-bar">
+      <input id="w-add" class="add-input" type="text" placeholder="Add item…"
+        autocapitalize="words" autocomplete="off"
+        onkeydown="if(event.key==='Enter')doAdd()" />
+      <button class="add-btn" onclick="doAdd()">Add</button>
+    </div>`;
+
+  let rows;
+  if (items.length === 0) {
+    rows = `<div class="empty"><span>List is empty</span></div>`;
+  } else {
+    rows = `<div class="item-list">
+      ${items.map(i => `
+        <div class="item-row">
+          <div class="bullet"></div>
+          <span class="item-name">${esc(i.name)}</span>
+        </div>`).join("")}
+    </div>`;
+  }
+
+  const footer = `
+    <div class="footer">
+      <a class="open-link" href="/run/${APP_ID}">Full list →</a>
+    </div>`;
+
+  document.body.innerHTML = header + addBar + rows + footer;
+}
+
+window.doAdd = async function() {
+  const input = document.getElementById("w-add");
+  if (!input?.value.trim()) return;
+  const val = input.value;
+  input.value = "";
+  input.focus();
+  await addItem(val);
+};
+
+(async () => {
+  await setup();
+  await load();
+})().catch(() => {
+  document.body.innerHTML = `
+    <div class="empty"><a href="/run/${APP_ID}" style="color:#111827;font-weight:600">Open list →</a></div>`;
+});
+</script>
+</body>
+</html>
