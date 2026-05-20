@@ -7,11 +7,23 @@
   "runtime": "static",
   "storage": "db",
   "category": "family",
-  "tags": ["grocery", "shopping", "list", "household"],
-  "nav": { "label": "Groceries", "icon": "🛒" },
-  "widget": { "label": "Groceries", "size": "small" },
+  "tags": [
+    "grocery",
+    "shopping",
+    "list",
+    "household"
+  ],
+  "nav": {
+    "label": "Groceries"
+  },
+  "widget": {
+    "label": "Groceries",
+    "size": "small"
+  },
   "data_access": {
-    "reads": ["family.members"],
+    "reads": [
+      "family.members"
+    ],
     "writes": []
   },
   "permissions": {
@@ -22,5 +34,6 @@
     "max_store_bytes": 262144,
     "max_store_reads_per_day": 1000,
     "max_store_writes_per_day": 500
-  }
+  },
+  "icon": "🛒"
 }
