@@ -154,7 +154,7 @@
 </div>
 
 <script type="module">
-import { memberColor, initial, esc, isAdult } from "/hub-sdk.js";
+import { memberColor, initial, esc, isAdult, hubConfirm } from "/hub-sdk.js";
 import { normalizeItem, isDuplicate, sortItems, canCheck } from "./logic.js";
 
 const CONTEXT    = window.__CONTEXT_URL ?? "";
@@ -252,7 +252,7 @@ async function toggleCheck(itemId) {
 
 async function clearChecked() {
   if (!canCheck(currentMember)) return;
-  if (!confirm("Remove all checked items from the list?")) return;
+  if (!await hubConfirm({ message: "Remove all checked items?", confirmLabel: "Clear checked" })) return;
   await dbq(`DELETE FROM items WHERE checked = 1`);
   await loadItems();
   render();
