@@ -369,7 +369,10 @@ window.doAdd = async function() {
   if (!input?.value.trim()) return;
   const val = input.value;
   input.value = "";
+  const btn = document.querySelector('.add-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Adding…'; }
   await addItem(val);
+  if (btn) { btn.disabled = false; btn.textContent = 'Add'; }
 };
 window.doToggle = id => toggleCheck(id);
 window.doClear  = () => clearChecked();
