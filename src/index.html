@@ -224,9 +224,10 @@ async function processPendingInbox() {
       const addedBy = typeof item.addedBy === "string" ? item.addedBy.trim() : "another app";
       await dbq(
         `INSERT INTO items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at)
-         VALUES (?, ?, ?, ?, ?, 0, ?)`,
+         VALUES (?, ?, ?, ?, ?, 0, ?)
+         ON CONFLICT DO NOTHING`,
         [crypto.randomUUID(), name, normalizeItem(name), "cross-app", addedBy, new Date().toISOString()]
-      ).catch(() => {}); // silently ignore duplicates (UNIQUE constraint)
+      ).catch(() => {});
     }
 
     // Clear the inbox now that items are processed
@@ -409,7 +410,6 @@ window.doClear  = () => clearChecked();
 (async () => {
   await loadMembers();
   await setup();
-  await processPendingInbox();
   await loadItems();
   if (HUB_MEMBER) {
     currentMember = members.find(m => m.id === HUB_MEMBER.id) ?? {
@@ -417,6 +417,11 @@ window.doClear  = () => clearChecked();
     };
   }
   render();
+  // Process cross-app inbox in background; re-render when done
+  processPendingInbox().then(async () => {
+    await loadItems();
+    render();
+  }).catch(() => {});
 })();
 </script>
 </body>
