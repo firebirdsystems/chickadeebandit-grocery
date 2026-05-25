@@ -159,6 +159,7 @@ import { normalizeItem, isDuplicate, sortItems, canCheck } from "./logic.js";
 
 const CONTEXT    = window.__CONTEXT_URL ?? "";
 const DB         = window.__DB_URL      ?? "";
+const STORE      = window.__STORE_URL   ?? "";
 const APP_ID     = window.__APP_ID      ?? "grocery";
 const HUB_MEMBER = window.__CURRENT_MEMBER ?? null;
 
@@ -204,6 +205,33 @@ async function loadMembers() {
 async function loadItems() {
   const { rows } = await dbq(`SELECT * FROM items ORDER BY checked ASC, name ASC`);
   items = rows.map(r => ({ ...r, checked: !!r.checked }));
+}
+
+// ── Pending inbox (cross-app writes from other apps) ─────────────────────────
+async function processPendingInbox() {
+  if (!STORE) return;
+  try {
+    const res = await fetch(`${STORE}?key=pending_items`);
+    if (!res.ok) return;
+    const { value } = await res.json();
+    if (!value) return;
+    const pending = JSON.parse(value).items ?? [];
+    if (!pending.length) return;
+
+    for (const item of pending) {
+      const name = typeof item.name === "string" ? item.name.trim() : "";
+      if (!name) continue;
+      const addedBy = typeof item.addedBy === "string" ? item.addedBy.trim() : "another app";
+      await dbq(
+        `INSERT INTO items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at)
+         VALUES (?, ?, ?, ?, ?, 0, ?)`,
+        [crypto.randomUUID(), name, normalizeItem(name), "cross-app", addedBy, new Date().toISOString()]
+      ).catch(() => {}); // silently ignore duplicates (UNIQUE constraint)
+    }
+
+    // Clear the inbox now that items are processed
+    await fetch(`${STORE}?key=pending_items`, { method: "DELETE" });
+  } catch { /* non-fatal — don't block app load */ }
 }
 
 // ── Actions ───────────────────────────────────────────────────────────────────
@@ -381,6 +409,7 @@ window.doClear  = () => clearChecked();
 (async () => {
   await loadMembers();
   await setup();
+  await processPendingInbox();
   await loadItems();
   if (HUB_MEMBER) {
     currentMember = members.find(m => m.id === HUB_MEMBER.id) ?? {

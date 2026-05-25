@@ -1,7 +1,7 @@
 {
   "id": "grocery",
   "name": "Grocery List",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A shared household grocery list. Anyone can add items; adults check things off. Items are alphabetical and automatically deduplicated.",
   "entrypoint": "index.html",
   "runtime": "static",
@@ -20,6 +20,7 @@
     "label": "Groceries",
     "size": "small"
   },
+  "exports": ["pending_items"],
   "data_access": {
     "reads": [
       "family.members"
