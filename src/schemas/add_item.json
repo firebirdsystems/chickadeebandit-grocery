@@ -1,0 +1,13 @@
+{
+  "type": "array",
+  "items": [
+    {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Item name to add to the grocery list"
+    }
+  ],
+  "minItems": 1,
+  "maxItems": 1
+}
