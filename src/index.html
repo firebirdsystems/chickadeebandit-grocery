@@ -121,21 +121,6 @@
     }
     .clear-btn:hover { background: var(--red-light); border-color: var(--red); }
 
-    /* ── Who screen ── */
-    #who-screen { text-align: center; padding: 48px 16px; }
-    #who-screen h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 6px; }
-    #who-screen p  { color: var(--muted); margin-bottom: 28px; }
-    .member-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-      gap: 10px; max-width: 380px; margin: 0 auto;
-    }
-    .member-btn {
-      display: flex; flex-direction: column; align-items: center; gap: 8px;
-      padding: 18px 10px; background: var(--card); border: 2px solid var(--border);
-      border-radius: var(--radius); cursor: pointer; font-size: 0.85rem;
-      font-weight: 600; color: var(--text); transition: all .15s;
-    }
-    .member-btn:hover { border-color: var(--accent); background: var(--accent-light); }
     .avatar {
       width: 44px; height: 44px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
@@ -289,23 +274,6 @@ async function clearChecked() {
 }
 
 // ── Rendering ─────────────────────────────────────────────────────────────────
-function renderWhoScreen() {
-  document.getElementById("root").innerHTML = `
-    <div id="who-screen">
-      <div style="font-size:2.5rem;margin-bottom:12px">🛒</div>
-      <h2>Grocery List</h2>
-      <p>Shared shopping list for the whole household — who are you?</p>
-      <div class="member-grid">
-        ${members.map(m => `
-          <button class="member-btn" onclick="selectMember('${m.id}')">
-            <div class="avatar" style="background:${memberColor(m.id)}">${initial(m.name)}</div>
-            <span>${esc(m.name)}</span>
-          </button>
-        `).join("")}
-      </div>
-    </div>`;
-}
-
 function renderList() {
   const sorted   = sortItems(items);
   const unchecked = sorted.filter(i => !i.checked);
@@ -355,7 +323,6 @@ function renderList() {
     <div class="list-footer">
       <span class="count-label">
         ${unchecked.length} item${unchecked.length !== 1 ? "s" : ""} to get
-        ${!HUB_MEMBER ? `<button style="margin-left:8px;font-size:0.75rem;font-weight:600;background:none;border:none;color:var(--muted);cursor:pointer;text-decoration:underline" onclick="switchMember()">Switch</button>` : ""}
       </span>
       ${adult && checked.length > 0
         ? `<button class="clear-btn" onclick="doClear()">Clear checked (${checked.length})</button>`
@@ -367,7 +334,6 @@ function renderList() {
 }
 
 function render() {
-  if (!currentMember) { renderWhoScreen(); return; }
   renderList();
 }
 
@@ -384,15 +350,6 @@ function clearError() {
 }
 
 // ── Window globals ────────────────────────────────────────────────────────────
-window.selectMember = function(id) {
-  currentMember = members.find(m => m.id === id) ?? null;
-  render();
-};
-window.switchMember = function() {
-  if (HUB_MEMBER) return;
-  currentMember = null;
-  render();
-};
 window.doAdd = async function() {
   const input = document.getElementById("add-input");
   if (!input?.value.trim()) return;
