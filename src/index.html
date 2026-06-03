@@ -256,13 +256,25 @@ async function toggleCheck(itemId) {
   if (!canCheck(currentMember)) return;
   const item = items.find(i => i.id === itemId);
   if (!item) return;
-  const next = item.checked ? 0 : 1;
-  await dbq(
-    `UPDATE items SET checked = ?, checked_by_name = ? WHERE id = ?`,
-    [next, next ? currentMember.name : null, itemId]
-  );
-  await loadItems();
+  const wasChecked = item.checked;
+  const next = wasChecked ? 0 : 1;
+
+  // Optimistic update: reflect change immediately before DB write
+  item.checked = !!next;
+  item.checked_by_name = next ? currentMember.name : null;
   render();
+
+  try {
+    await dbq(
+      `UPDATE items SET checked = ?, checked_by_name = ? WHERE id = ?`,
+      [next, next ? currentMember.name : null, itemId]
+    );
+  } catch {
+    // Revert on failure
+    item.checked = wasChecked;
+    item.checked_by_name = wasChecked ? item.checked_by_name : null;
+    render();
+  }
 }
 
 async function clearChecked() {
