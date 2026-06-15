@@ -232,6 +232,17 @@ async function addItem(rawName) {
     return;
   }
 
+  clearError();
+
+  // Optimistic insert: show the item immediately, reconcile with the server after.
+  const tempId = `temp-${crypto.randomUUID()}`;
+  items = [...items, {
+    id: tempId, name, name_normalized: normalized,
+    added_by_id: currentMember.id, added_by_name: currentMember.name,
+    checked: false, checked_by_name: null, created_at: new Date().toISOString(),
+  }];
+  render();
+
   try {
     await dbq(
       `INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at)
@@ -239,16 +250,18 @@ async function addItem(rawName) {
       [crypto.randomUUID(), name, normalized,
        currentMember.id, currentMember.name, new Date().toISOString()]
     );
-    clearError();
     await loadItems();
     render();
   } catch (e) {
+    // Roll back the optimistic item on failure.
+    items = items.filter(i => i.id !== tempId);
     // UNIQUE constraint → already exists (race condition)
     if (e.message?.includes("UNIQUE") || e.message?.includes("unique")) {
       showError(`"${name}" is already on the list.`);
     } else {
       showError("Could not add item — try again.");
     }
+    render();
   }
 }
 
