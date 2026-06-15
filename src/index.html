@@ -293,9 +293,21 @@ async function toggleCheck(itemId) {
 async function clearChecked() {
   if (!canCheck(currentMember)) return;
   if (!await hubConfirm({ message: "Remove all checked items?", confirmLabel: "Clear checked" })) return;
-  await dbq(`DELETE FROM app_grocery__items WHERE checked = 1`);
-  await loadItems();
+
+  // Optimistic: remove checked items immediately, restore on failure.
+  const removed = items.filter(i => i.checked);
+  items = items.filter(i => !i.checked);
   render();
+
+  try {
+    await dbq(`DELETE FROM app_grocery__items WHERE checked = 1`);
+    await loadItems();
+    render();
+  } catch {
+    items = [...items, ...removed];
+    showError("Could not clear checked items — try again.");
+    render();
+  }
 }
 
 // ── Rendering ─────────────────────────────────────────────────────────────────
