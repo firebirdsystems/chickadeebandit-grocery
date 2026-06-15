@@ -203,20 +203,38 @@ async function processPendingInbox() {
     const pending = JSON.parse(value).items ?? [];
     if (!pending.length) return;
 
+    const now = new Date().toISOString();
+    const newItems = [];
     for (const item of pending) {
       const name = typeof item.name === "string" ? item.name.trim() : "";
       if (!name) continue;
       const addedBy = typeof item.addedBy === "string" ? item.addedBy.trim() : "another app";
-      await dbq(
-        `INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at)
-         VALUES (?, ?, ?, ?, ?, 0, ?)
-         ON CONFLICT DO NOTHING`,
-        [crypto.randomUUID(), name, normalizeItem(name), "cross-app", addedBy, new Date().toISOString()]
-      ).catch(() => {});
+      const normalized = normalizeItem(name);
+      if (items.some(i => i.name_normalized === normalized)) continue;
+      newItems.push({
+        id: crypto.randomUUID(), name, name_normalized: normalized,
+        added_by_id: "cross-app", added_by_name: addedBy, checked: false, created_at: now,
+      });
+    }
+    if (!newItems.length) {
+      fetch(`${STORE}?key=pending_items`, { method: "DELETE" }).catch(() => {});
+      return;
     }
 
+    // Optimistic update: show new items immediately
+    items = [...items, ...newItems];
+    render();
+
+    // Persist in the background
+    await Promise.all(newItems.map(it => dbq(
+      `INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at)
+       VALUES (?, ?, ?, ?, ?, 0, ?)
+       ON CONFLICT DO NOTHING`,
+      [it.id, it.name, it.name_normalized, it.added_by_id, it.added_by_name, it.created_at]
+    ).catch(() => {})));
+
     // Clear the inbox now that items are processed
-    await fetch(`${STORE}?key=pending_items`, { method: "DELETE" });
+    fetch(`${STORE}?key=pending_items`, { method: "DELETE" }).catch(() => {});
   } catch { /* non-fatal — don't block app load */ }
 }
 
@@ -299,15 +317,18 @@ async function clearChecked() {
   items = items.filter(i => !i.checked);
   render();
 
-  try {
-    await dbq(`DELETE FROM app_grocery__items WHERE checked = 1`);
-    await loadItems();
-    render();
-  } catch {
-    items = [...items, ...removed];
-    showError("Could not clear checked items — try again.");
-    render();
-  }
+  // Persist in the background
+  (async () => {
+    try {
+      await dbq(`DELETE FROM app_grocery__items WHERE checked = 1`);
+      await loadItems();
+      render();
+    } catch {
+      items = [...items, ...removed];
+      showError("Could not clear checked items — try again.");
+      render();
+    }
+  })();
 }
 
 // ── Rendering ─────────────────────────────────────────────────────────────────
