@@ -188,7 +188,7 @@ async function loadMembers() {
 }
 
 async function loadItems() {
-  const { rows } = await dbq(`SELECT * FROM items ORDER BY checked ASC, name ASC`);
+  const { rows } = await dbq(`SELECT * FROM app_grocery__items ORDER BY checked ASC, name ASC`);
   items = rows.map(r => ({ ...r, checked: !!r.checked }));
 }
 
@@ -208,7 +208,7 @@ async function processPendingInbox() {
       if (!name) continue;
       const addedBy = typeof item.addedBy === "string" ? item.addedBy.trim() : "another app";
       await dbq(
-        `INSERT INTO items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at)
+        `INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at)
          VALUES (?, ?, ?, ?, ?, 0, ?)
          ON CONFLICT DO NOTHING`,
         [crypto.randomUUID(), name, normalizeItem(name), "cross-app", addedBy, new Date().toISOString()]
@@ -234,7 +234,7 @@ async function addItem(rawName) {
 
   try {
     await dbq(
-      `INSERT INTO items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at)
+      `INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at)
        VALUES (?, ?, ?, ?, ?, 0, ?)`,
       [crypto.randomUUID(), name, normalized,
        currentMember.id, currentMember.name, new Date().toISOString()]
@@ -266,7 +266,7 @@ async function toggleCheck(itemId) {
 
   try {
     await dbq(
-      `UPDATE items SET checked = ?, checked_by_name = ? WHERE id = ?`,
+      `UPDATE app_grocery__items SET checked = ?, checked_by_name = ? WHERE id = ?`,
       [next, next ? currentMember.name : null, itemId]
     );
   } catch {
@@ -280,7 +280,7 @@ async function toggleCheck(itemId) {
 async function clearChecked() {
   if (!canCheck(currentMember)) return;
   if (!await hubConfirm({ message: "Remove all checked items?", confirmLabel: "Clear checked" })) return;
-  await dbq(`DELETE FROM items WHERE checked = 1`);
+  await dbq(`DELETE FROM app_grocery__items WHERE checked = 1`);
   await loadItems();
   render();
 }
