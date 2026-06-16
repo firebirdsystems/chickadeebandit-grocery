@@ -7,12 +7,12 @@ INSERT INTO app_grocery__items (
   checked,
   created_at
 ) VALUES (
-  gen_random_uuid()::text,
+  gen_random_uuid(),
   $1,
   lower(trim($1)),
   'ai',
   'AI',
   0,
-  NOW()::text
+  datetime('now')
 )
 ON CONFLICT (name_normalized) DO NOTHING
