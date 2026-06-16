@@ -317,12 +317,11 @@ async function clearChecked() {
   items = items.filter(i => !i.checked);
   render();
 
-  // Persist in the background
+  // Persist in the background — no re-sync needed; optimistic state is authoritative.
+  // (Re-fetching from DB after DELETE races with in-flight toggleCheck writes.)
   (async () => {
     try {
       await dbq(`DELETE FROM app_grocery__items WHERE checked = 1`);
-      await loadItems();
-      render();
     } catch {
       items = [...items, ...removed];
       showError("Could not clear checked items — try again.");
