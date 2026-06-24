@@ -337,7 +337,7 @@ function renderList() {
   const checked   = sorted.filter(i => i.checked);
   const adult     = canCheck(currentMember);
 
-  const addBar = `
+  const addBar = adult ? `
     <div class="add-bar">
       <input id="add-input" class="add-input" type="text"
         placeholder="Add an item…"
@@ -345,6 +345,7 @@ function renderList() {
         autocomplete="off" autocapitalize="words" />
       <button class="add-btn" onclick="doAdd()">Add</button>
     </div>
+    <div id="error-msg" class="error-msg" style="display:none"></div>` : `
     <div id="error-msg" class="error-msg" style="display:none"></div>`;
 
   function itemRow(item) {

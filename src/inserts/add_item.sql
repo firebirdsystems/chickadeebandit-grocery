@@ -7,7 +7,7 @@ INSERT INTO app_grocery__items (
   checked,
   created_at
 ) VALUES (
-  gen_random_uuid(),
+  lower(hex(randomblob(16))),
   $1,
   lower(trim($1)),
   'ai',

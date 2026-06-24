@@ -43,5 +43,8 @@
     "db_exports": ["pending_items", "all_items"],
     "db_mutations": ["check_off_item", "uncheck_item"],
     "db_inserts": ["add_item"]
+  },
+  "row_policies": {
+    "items": { "kind": "adult_writable" }
   }
 }
