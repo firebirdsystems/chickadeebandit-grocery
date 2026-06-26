@@ -140,7 +140,7 @@
 
 <script type="module">
 import { memberColor, initial, esc, isAdult, hubConfirm } from "/hub-sdk.js";
-import { normalizeItem, isDuplicate, sortItems, canCheck } from "./logic.js";
+import { normalizeItem, isDuplicate, sortItems } from "./logic.js";
 
 const CONTEXT    = window.__CONTEXT_URL ?? "";
 const DB         = window.__DB_URL      ?? "";
@@ -284,7 +284,7 @@ async function addItem(rawName) {
 }
 
 async function toggleCheck(itemId) {
-  if (!canCheck(currentMember)) return;
+  if (!currentMember) return;
   const item = items.find(i => i.id === itemId);
   if (!item) return;
   const wasChecked = item.checked;
@@ -309,7 +309,7 @@ async function toggleCheck(itemId) {
 }
 
 async function clearChecked() {
-  if (!canCheck(currentMember)) return;
+  if (!currentMember) return;
   if (!await hubConfirm({ message: "Remove all checked items?", confirmLabel: "Clear checked" })) return;
 
   // Optimistic: remove checked items immediately, restore on failure.
@@ -335,9 +335,12 @@ function renderList() {
   const sorted   = sortItems(items);
   const unchecked = sorted.filter(i => !i.checked);
   const checked   = sorted.filter(i => i.checked);
-  const adult     = canCheck(currentMember);
+  // Grocery is a fully collaborative shared list: any household member may add,
+  // check off, and clear items (the `items` table has no row policy). We only
+  // require a resolved member to attribute the action to.
+  const canWrite = !!currentMember;
 
-  const addBar = adult ? `
+  const addBar = canWrite ? `
     <div class="add-bar">
       <input id="add-input" class="add-input" type="text"
         placeholder="Add an item…"
@@ -349,9 +352,9 @@ function renderList() {
     <div id="error-msg" class="error-msg" style="display:none"></div>`;
 
   function itemRow(item) {
-    const btn = adult
-      ? `<button class="check-btn ${item.checked ? "" : ""}" onclick="doToggle('${item.id}')" title="${item.checked ? "Uncheck" : "Check off"}">✓</button>`
-      : `<div class="check-btn readonly" title="Only adults can check items">✓</div>`;
+    const btn = canWrite
+      ? `<button class="check-btn" onclick="doToggle('${item.id}')" title="${item.checked ? "Uncheck" : "Check off"}">✓</button>`
+      : `<div class="check-btn readonly" title="Sign in to check items">✓</div>`;
     const meta = item.checked && item.checked_by_name
       ? `<span class="item-meta">by ${esc(item.checked_by_name)}</span>`
       : `<span class="item-meta">${esc(item.added_by_name)}</span>`;
@@ -382,7 +385,7 @@ function renderList() {
       <span class="count-label">
         ${unchecked.length} item${unchecked.length !== 1 ? "s" : ""} to get
       </span>
-      ${adult && checked.length > 0
+      ${canWrite && checked.length > 0
         ? `<button class="clear-btn" onclick="doClear()">Clear checked (${checked.length})</button>`
         : ""}
     </div>`;

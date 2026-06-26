@@ -22,8 +22,3 @@ export function sortItems(items) {
     return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
   });
 }
-
-/** Returns true if the member is an adult or admin and can check items off. */
-export function canCheck(member) {
-  return !!member && (member.role === "adult" || member.role === "admin");
-}

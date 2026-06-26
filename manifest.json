@@ -1,8 +1,8 @@
 {
   "id": "grocery",
   "name": "Grocery List",
-  "version": "1.1.0",
-  "description": "A shared household grocery list. Anyone can add items; adults check things off. Items are alphabetical and automatically deduplicated.",
+  "version": "1.2.0",
+  "description": "A shared household grocery list. Any member can add items and check them off. Items are alphabetical and automatically deduplicated.",
   "entrypoint": "index.html",
   "runtime": "static",
   "storage": "db",
@@ -43,8 +43,5 @@
     "db_exports": ["pending_items", "all_items"],
     "db_mutations": ["check_off_item", "uncheck_item"],
     "db_inserts": ["add_item"]
-  },
-  "row_policies": {
-    "items": { "kind": "adult_writable" }
   }
 }

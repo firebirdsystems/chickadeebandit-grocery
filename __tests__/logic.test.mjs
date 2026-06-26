@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   memberColor, initial, esc, AVATAR_COLORS,
-  normalizeItem, isDuplicate, sortItems, canCheck,
+  normalizeItem, isDuplicate, sortItems,
 } from "../src/logic.js";
 
 // ── memberColor / initial ─────────────────────────────────────────────────────
@@ -112,13 +112,4 @@ describe("sortItems", () => {
     const names  = sorted.map(i => i.name);
     expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
   });
-});
-
-// ── canCheck ──────────────────────────────────────────────────────────────────
-describe("canCheck", () => {
-  it("returns true for adults",    () => expect(canCheck({ role: "adult" })).toBe(true));
-  it("returns true for admins",    () => expect(canCheck({ role: "admin" })).toBe(true));
-  it("returns false for children", () => expect(canCheck({ role: "child" })).toBe(false));
-  it("returns false for null",     () => expect(canCheck(null)).toBe(false));
-  it("returns false for undefined",() => expect(canCheck(undefined)).toBe(false));
 });
