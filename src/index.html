@@ -353,7 +353,7 @@ function renderList() {
 
   function itemRow(item) {
     const btn = canWrite
-      ? `<button class="check-btn" onclick="doToggle('${item.id}')" title="${item.checked ? "Uncheck" : "Check off"}">✓</button>`
+      ? `<button class="check-btn" data-id="${esc(item.id)}" title="${item.checked ? "Uncheck" : "Check off"}">✓</button>`
       : `<div class="check-btn readonly" title="Sign in to check items">✓</div>`;
     const meta = item.checked && item.checked_by_name
       ? `<span class="item-meta">by ${esc(item.checked_by_name)}</span>`
@@ -421,8 +421,16 @@ window.doAdd = async function() {
   await addItem(val);
   if (btn) { btn.disabled = false; btn.textContent = 'Add'; }
 };
-window.doToggle = id => toggleCheck(id);
 window.doClear  = () => clearChecked();
+
+// Delegated check-off handler. Item ids are attacker-controllable — the `items`
+// table has no row policy, so ANY member can INSERT a row with a crafted id via
+// raw /api/db. Keeping the id in a data-* attribute + delegation (never an inline
+// onclick JS string) prevents stored XSS. #root persists across re-renders.
+document.getElementById("root").addEventListener("click", (e) => {
+  const b = e.target.closest(".check-btn:not(.readonly)");
+  if (b?.dataset.id) toggleCheck(b.dataset.id);
+});
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 (async () => {
