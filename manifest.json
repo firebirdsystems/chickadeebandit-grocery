@@ -21,6 +21,13 @@
     "label": "Groceries",
     "size": "small"
   },
+  "glance": {
+    "source": {
+      "kind": "sql",
+      "query": "SELECT COUNT(*) AS n FROM app_grocery__items WHERE checked = 0 LIMIT 1"
+    },
+    "display": { "template": "badge", "count": "n", "label": "to buy", "severity": "info" }
+  },
   "exports": ["pending_items"],
   "data_access": {
     "reads": [
