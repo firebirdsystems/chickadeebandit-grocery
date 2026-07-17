@@ -1,7 +1,7 @@
 {
   "id": "grocery",
   "name": "Grocery List",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "A shared household grocery list. Any member can add items and check them off. Items are alphabetical and automatically deduplicated.",
   "entrypoint": "index.html",
   "runtime": "static",
@@ -27,6 +27,17 @@
       "query": "SELECT COUNT(*) AS n FROM app_grocery__items WHERE checked = 0 LIMIT 1"
     },
     "display": { "template": "badge", "count": "n", "label": "to buy", "severity": "info" }
+  },
+  "kiosk_quick_add": {
+    "table": "items",
+    "label": "Grocery list",
+    "text_column": "name",
+    "normalized_column": "name_normalized",
+    "actions": ["add", "toggle"],
+    "done_column": "checked",
+    "done_by_name_column": "checked_by_name",
+    "attribution": { "id_column": "added_by_id", "name_column": "added_by_name" },
+    "created_at_column": "created_at"
   },
   "exports": ["pending_items"],
   "data_access": {
