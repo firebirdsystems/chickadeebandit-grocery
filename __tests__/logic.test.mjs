@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   memberColor, initial, esc, AVATAR_COLORS,
-  normalizeItem, isDuplicate, sortItems,
+  normalizeItem, isDuplicate, reviveTarget, sortItems,
 } from "../src/logic.js";
 
 // ── memberColor / initial ─────────────────────────────────────────────────────
@@ -64,6 +64,27 @@ describe("isDuplicate", () => {
   it("handles multi-word names", () => {
     expect(isDuplicate(items, "almond   milk")).toBe(true);
     expect(isDuplicate(items, "Oat Milk")).toBe(false);
+  });
+  it("does not treat a checked-off item as a blocking duplicate", () => {
+    const withChecked = [{ name: "Milk", name_normalized: "milk", checked: true }];
+    expect(isDuplicate(withChecked, "milk")).toBe(false);
+  });
+});
+
+// ── reviveTarget ──────────────────────────────────────────────────────────────
+describe("reviveTarget", () => {
+  const items = [
+    { id: "1", name: "Milk", name_normalized: "milk", checked: true },
+    { id: "2", name: "Eggs", name_normalized: "eggs", checked: false },
+  ];
+  it("returns the checked item to revive", () => {
+    expect(reviveTarget(items, "MILK")?.id).toBe("1");
+  });
+  it("returns undefined for an active item (that path is a plain duplicate)", () => {
+    expect(reviveTarget(items, "eggs")).toBeUndefined();
+  });
+  it("returns undefined for a brand-new name", () => {
+    expect(reviveTarget(items, "Butter")).toBeUndefined();
   });
 });
 

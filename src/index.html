@@ -140,7 +140,7 @@
 
 <script type="module">
 import { memberColor, initial, esc, isAdult, hubConfirm } from "/hub-sdk.js";
-import { normalizeItem, isDuplicate, sortItems } from "./logic.js";
+import { normalizeItem, isDuplicate, reviveTarget, sortItems } from "./logic.js";
 
 const CONTEXT    = window.__CONTEXT_URL ?? "";
 const DB         = window.__DB_URL      ?? "";
@@ -205,18 +205,27 @@ async function processPendingInbox() {
 
     const now = new Date().toISOString();
     const newItems = [];
+    const reviveIds = [];
     for (const item of pending) {
       const name = typeof item.name === "string" ? item.name.trim() : "";
       if (!name) continue;
       const addedBy = typeof item.addedBy === "string" ? item.addedBy.trim() : "another app";
       const normalized = normalizeItem(name);
-      if (items.some(i => i.name_normalized === normalized)) continue;
+      const revive = reviveTarget(items, name);
+      if (revive) {
+        // Revive a checked-off duplicate rather than dropping the request.
+        revive.checked = false;
+        revive.checked_by_name = null;
+        reviveIds.push(revive.id);
+        continue;
+      }
+      if (isDuplicate(items, name)) continue; // already active
       newItems.push({
         id: crypto.randomUUID(), name, name_normalized: normalized,
         added_by_id: "cross-app", added_by_name: addedBy, checked: false, created_at: now,
       });
     }
-    if (!newItems.length) {
+    if (!newItems.length && !reviveIds.length) {
       fetch(`${STORE}?key=pending_items`, { method: "DELETE" }).catch(() => {});
       return;
     }
@@ -226,12 +235,18 @@ async function processPendingInbox() {
     render();
 
     // Persist in the background
-    await Promise.all(newItems.map(it => dbq(
-      `INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at)
-       VALUES (?, ?, ?, ?, ?, 0, ?)
-       ON CONFLICT DO NOTHING`,
-      [it.id, it.name, it.name_normalized, it.added_by_id, it.added_by_name, it.created_at]
-    ).catch(() => {})));
+    await Promise.all([
+      ...newItems.map(it => dbq(
+        `INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at)
+         VALUES (?, ?, ?, ?, ?, 0, ?)
+         ON CONFLICT DO NOTHING`,
+        [it.id, it.name, it.name_normalized, it.added_by_id, it.added_by_name, it.created_at]
+      ).catch(() => {})),
+      ...reviveIds.map(id => dbq(
+        `UPDATE app_grocery__items SET checked = 0, checked_by_name = NULL, created_at = ? WHERE id = ?`,
+        [now, id]
+      ).catch(() => {})),
+    ]);
 
     // Clear the inbox now that items are processed
     fetch(`${STORE}?key=pending_items`, { method: "DELETE" }).catch(() => {});
@@ -244,7 +259,31 @@ async function addItem(rawName) {
   const normalized = normalizeItem(name);
   if (!name) return;
 
-  // Client-side dedup check for a friendly error
+  // Re-adding a checked-off item revives it (rather than hitting the
+  // UNIQUE(name_normalized) constraint), matching the kiosk quick-add lane.
+  const revive = reviveTarget(items, name);
+  if (revive) {
+    clearError();
+    const prev = { checked: revive.checked, checked_by_name: revive.checked_by_name };
+    revive.checked = false;
+    revive.checked_by_name = null;
+    render();
+    try {
+      await dbq(
+        `UPDATE app_grocery__items SET checked = 0, checked_by_name = NULL, created_at = ? WHERE id = ?`,
+        [new Date().toISOString(), revive.id]
+      );
+      await loadItems();
+      render();
+    } catch {
+      Object.assign(revive, prev);
+      showError(`Could not add "${name}" — try again.`);
+      render();
+    }
+    return;
+  }
+
+  // Client-side dedup check for a friendly error (only active items block)
   if (isDuplicate(items, name)) {
     showError(`"${name}" is already on the list.`);
     return;

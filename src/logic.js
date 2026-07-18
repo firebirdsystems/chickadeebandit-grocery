@@ -9,10 +9,20 @@ export function normalizeItem(name) {
   return String(name).trim().toLowerCase().replace(/\s+/g, " ");
 }
 
-/** Returns true if a normalized version of `name` already exists in `items`. */
+/** Returns true if `name` already exists as an *active* (unchecked) item. A
+ *  checked-off match does not block the add: re-adding it revives that row
+ *  (see reviveTarget) instead, matching the kiosk quick-add lane. */
 export function isDuplicate(items, name) {
   const key = normalizeItem(name);
-  return items.some(i => i.name_normalized === key);
+  return items.some(i => i.name_normalized === key && !i.checked);
+}
+
+/** The checked-off item `name` should revive, if any (there is at most one,
+ *  since name_normalized is UNIQUE). Returns undefined when the name is new or
+ *  already active. */
+export function reviveTarget(items, name) {
+  const key = normalizeItem(name);
+  return items.find(i => i.name_normalized === key && i.checked);
 }
 
 /** Sort items: unchecked alphabetically first, then checked alphabetically. */
