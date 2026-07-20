@@ -1,7 +1,7 @@
 {
   "id": "grocery",
   "name": "Grocery List",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "A shared household grocery list. Any member can add items and check them off. Items are alphabetical and automatically deduplicated.",
   "entrypoint": "index.html",
   "runtime": "static",
@@ -28,6 +28,7 @@
     },
     "display": { "template": "badge", "count": "n", "label": "to buy", "severity": "info" }
   },
+  "capture_consumer": { "kinds": ["grocery_item"], "via": "quick_add" },
   "kiosk_quick_add": {
     "table": "items",
     "label": "Grocery list",
