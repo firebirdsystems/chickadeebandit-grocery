@@ -41,6 +41,7 @@
     "created_at_column": "created_at"
   },
   "exports": ["pending_items"],
+  "contexts": ["household", "shared_space"],
   "data_access": {
     "reads": [
       "family.members"
