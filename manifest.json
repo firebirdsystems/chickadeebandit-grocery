@@ -40,6 +40,24 @@
     "attribution": { "id_column": "added_by_id", "name_column": "added_by_name" },
     "created_at_column": "created_at"
   },
+  "member_references": {
+    "items": {
+      "column": "added_by_id",
+      "on_removed": "keep"
+    }
+  },
+  "db_plaintext_columns": ["checked"],
+  "retention": {
+    "items": {
+      "default": 60,
+      "timestamp_column": "created_at",
+      "override_key": "checked_items",
+      "exempt_when": {
+        "column": "checked",
+        "values": [0]
+      }
+    }
+  },
   "exports": ["pending_items"],
   "contexts": ["household", "shared_space"],
   "data_access": {
@@ -53,6 +71,7 @@
     "requires_approval": false
   },
   "resource_limits": {
+    "max_db_bytes": 52428800,
     "max_store_bytes": 262144,
     "max_store_reads_per_day": 1000,
     "max_store_writes_per_day": 500
