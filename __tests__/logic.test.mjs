@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   memberColor, initial, esc, AVATAR_COLORS,
-  normalizeItem, isDuplicate, reviveTarget, sortItems,
+  normalizeItem, isDuplicate, reviveTarget, sortItems, searchableFields,
 } from "../src/logic.js";
 
 // ── memberColor / initial ─────────────────────────────────────────────────────
@@ -132,5 +132,13 @@ describe("sortItems", () => {
     const sorted = sortItems(all);
     const names  = sorted.map(i => i.name);
     expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
+  });
+});
+
+describe("searchableFields", () => {
+  it("matches on who added an item, not just its name", () => {
+    const fields = searchableFields({ name: "Oat milk", added_by_name: "Sam", checked_by_name: "" });
+    expect(fields).toContain("Oat milk");
+    expect(fields).toContain("Sam");
   });
 });

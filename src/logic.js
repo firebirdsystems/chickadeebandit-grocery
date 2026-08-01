@@ -32,3 +32,12 @@ export function sortItems(items) {
     return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
   });
 }
+
+/**
+ * Fields the in-app search matches against (see hub-sdk `searchMatch`).
+ * Who added or checked an item counts as well as its name, so "what
+ * did Sam put on here" is answerable.
+ */
+export function searchableFields(item) {
+  return [item.name, item.added_by_name, item.checked_by_name];
+}
