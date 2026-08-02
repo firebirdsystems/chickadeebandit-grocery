@@ -155,6 +155,22 @@ const STORE      = window.__STORE_URL   ?? "";
 const APP_ID     = window.__APP_ID      ?? "grocery";
 const HUB_MEMBER = window.__CURRENT_MEMBER ?? null;
 
+const EVENTS = window.__EVENTS_URL ?? "";
+
+async function publishEvent(type, subjectId, payload = {}) {
+  if (!EVENTS) return;
+  try {
+    await fetch(EVENTS, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, subject_id: subjectId, payload }),
+    });
+  } catch {
+    // Best-effort: the row is already written, so a failed publish is not fatal.
+  }
+}
+
+
 let members       = [];
 let currentMember = null;
 let items         = [];
@@ -315,6 +331,13 @@ async function addItem(rawName) {
       [crypto.randomUUID(), name, normalized,
        currentMember.id, currentMember.name, new Date().toISOString()]
     );
+    // Published only from the member-typed add, never from processPendingInbox:
+    // draining the inbox would re-emit items another app just sent here, and a
+    // grocery -> pantry -> grocery rule pair would loop.
+    await publishEvent("grocery.item_added", normalized, {
+      name,
+      added_by_id: currentMember.id,
+    });
     await loadItems();
     render();
   } catch (e) {

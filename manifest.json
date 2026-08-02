@@ -6,6 +6,44 @@
   "entrypoint": "index.html",
   "runtime": "static",
   "storage": "db",
+  "automation_actions": {
+    "add_item": {
+      "title": "Add to the grocery list",
+      "description": "Put something on the list when another app's event fires - a pantry staple running low, a recipe planned, a supply used up.",
+      "params": {
+        "added_by_id": {
+          "type": "member",
+          "label": "Added on behalf of",
+          "required": true
+        },
+        "name": {
+          "type": "text",
+          "label": "Item",
+          "required": true
+        }
+      },
+      "dedupe": {
+        "table": "items",
+        "column": "source_event_id"
+      },
+      "steps": [
+        {
+          "op": "insert",
+          "table": "items",
+          "values": {
+            "id": "$uuid",
+            "name": ":name",
+            "name_normalized": "$normalize(:name)",
+            "added_by_id": ":added_by_id",
+            "added_by_name": "Automation",
+            "created_at": "$now",
+            "source_event_id": "$event_id"
+          },
+          "on_conflict": "ignore"
+        }
+      ]
+    }
+  },
   "db_encryption": "off",
   "category": "family",
   "tags": [
@@ -14,6 +52,8 @@
     "list",
     "household"
   ],
+  "publishes": ["grocery.item_added"],
+  "publish_acls": {"grocery.item_added": {"require_role": "member"}},
   "nav": {
     "label": "Groceries"
   },
