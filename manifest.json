@@ -92,6 +92,7 @@
       "default": 60,
       "timestamp_column": "created_at",
       "override_key": "checked_items",
+      "tier": "operational",
       "exempt_when": {
         "column": "checked",
         "values": [0]
