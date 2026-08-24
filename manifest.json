@@ -1,7 +1,7 @@
 {
   "id": "grocery",
   "name": "Grocery List",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "description": "A shared household grocery list. Any member can add items and check them off. Items are alphabetical and automatically deduplicated.",
   "entrypoint": "index.html",
   "runtime": "static",
@@ -44,6 +44,19 @@
       ]
     }
   },
+  "suggested_automations": [
+    {
+      "title": "Add low pantry items to the grocery list",
+      "description": "When a pantry item crosses into low or out, it lands on the grocery list by itself — the restock loop pantry levels exist for. It fires only on the crossing, so ticking the count down further doesn't re-add it. Entries are recorded as added by whoever’s tap crossed the threshold.",
+      "trigger_event": "pantry.item_low",
+      "target_app_id": "grocery",
+      "action_id": "add_item",
+      "param_map": {
+        "name": { "kind": "payload_field", "value": "name" },
+        "added_by_id": { "kind": "payload_field", "value": "member_id" }
+      }
+    }
+  ],
   "db_encryption": "off",
   "category": "family",
   "tags": [
