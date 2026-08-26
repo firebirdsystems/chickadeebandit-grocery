@@ -6,6 +6,9 @@
   "entrypoint": "index.html",
   "runtime": "static",
   "storage": "db",
+  "preload": {
+    "items": {"sql": "SELECT * FROM app_grocery__items ORDER BY checked ASC, name ASC"}
+  },
   "automation_actions": {
     "add_item": {
       "title": "Add to the grocery list",
