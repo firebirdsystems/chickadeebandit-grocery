@@ -1,6 +1,6 @@
 # Grocery List
 
-A [Chickadee Bandit](http://chickadeebandit.com) app.
+A [Chickadee Bandit](https://chickadeebandit.com/app-library/grocery) app.
 
 A shared household grocery list. Anyone can add items; adults check things off. Items are kept alphabetical and automatically deduplicated.
 
