@@ -1,0 +1,148 @@
+{
+  "scenarios": [
+    {
+      "name": "the list holds one row per normalized item name; a different item is still allowed",
+      "members": { "a": "adult", "b": "adult" },
+      "steps": [
+        {
+          "action": "db",
+          "as": "a",
+          "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, created_at) VALUES (?, ?, lower(trim(?)), ?, ?, ?)",
+          "params": ["i1", "Milk", "Milk", "{{a}}", "A", "2026-01-01T00:00:00Z"],
+          "expect": { "status": 200 }
+        },
+        {
+          "action": "db",
+          "as": "b",
+          "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, created_at) VALUES (?, ?, lower(trim(?)), ?, ?, ?)",
+          "params": ["i2", " milk ", " milk ", "{{b}}", "B", "2026-01-01T00:01:00Z"],
+          "expect": { "status": 400, "errorIncludes": "UNIQUE" }
+        },
+        {
+          "action": "db",
+          "as": "b",
+          "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, created_at) VALUES (?, ?, lower(trim(?)), ?, ?, ?)",
+          "params": ["i3", "Eggs", "Eggs", "{{b}}", "B", "2026-01-01T00:02:00Z"],
+          "expect": { "status": 200 }
+        },
+        {
+          "action": "db",
+          "as": "a",
+          "sql": "SELECT id FROM app_grocery__items ORDER BY id",
+          "expect": { "status": 200, "rowCount": 2, "rowsContain": [{ "id": "i1" }, { "id": "i3" }] }
+        }
+      ]
+    },
+    {
+      "name": "the list is household-shared: a child sees an adult's items and can tick them off",
+      "members": { "parent": "adult", "child": "child" },
+      "steps": [
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES ('i1', 'Bread', 'bread', ?, 'Parent', 0, '2026-01-01T00:00:00Z')",
+          "params": ["{{parent}}"]
+        },
+        {
+          "action": "db",
+          "as": "child",
+          "sql": "SELECT id, name FROM app_grocery__items",
+          "expect": { "status": 200, "rowCount": 1, "rowsContain": [{ "id": "i1", "name": "Bread" }] }
+        },
+        {
+          "action": "db",
+          "as": "child",
+          "sql": "UPDATE app_grocery__items SET checked = 1, checked_by_name = 'Child' WHERE id = ?",
+          "params": ["i1"],
+          "expect": { "status": 200 }
+        },
+        {
+          "action": "db",
+          "as": "parent",
+          "sql": "SELECT id, checked, checked_by_name FROM app_grocery__items",
+          "expect": { "status": 200, "rowCount": 1, "rowsContain": [{ "id": "i1", "checked": 1, "checked_by_name": "Child" }] }
+        }
+      ]
+    },
+    {
+      "name": "add_item inserts a new item and silently skips one already on the list",
+      "members": { "a": "adult" },
+      "steps": [
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES ('i1', 'Milk', 'milk', ?, 'A', 0, '2026-01-01T00:00:00Z')",
+          "params": ["{{a}}"]
+        },
+        {
+          "action": "named",
+          "as": "a",
+          "kind": "insert",
+          "name": "add_item",
+          "params": [" MILK "],
+          "expect": { "status": 200 }
+        },
+        {
+          "action": "named",
+          "as": "a",
+          "kind": "insert",
+          "name": "add_item",
+          "params": ["Apples"],
+          "expect": { "status": 200 }
+        },
+        {
+          "action": "db",
+          "as": "a",
+          "sql": "SELECT name_normalized, added_by_name FROM app_grocery__items ORDER BY name_normalized",
+          "expect": { "status": 200, "rowCount": 2, "rowsContain": [{ "name_normalized": "apples", "added_by_name": "AI" }, { "name_normalized": "milk", "added_by_name": "A" }] }
+        }
+      ]
+    },
+    {
+      "name": "check_off_item removes an item from pending_items and uncheck_item restores it; all_items keeps both",
+      "members": { "a": "adult" },
+      "steps": [
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES ('i1', 'Milk', 'milk', ?, 'A', 0, '2026-01-01T00:00:00Z'), ('i2', 'Eggs', 'eggs', ?, 'A', 0, '2026-01-01T00:01:00Z')",
+          "params": ["{{a}}", "{{a}}"]
+        },
+        {
+          "action": "named",
+          "as": "a",
+          "kind": "mutation",
+          "name": "check_off_item",
+          "params": ["i1"],
+          "expect": { "status": 200 }
+        },
+        {
+          "action": "named",
+          "as": "a",
+          "kind": "query",
+          "name": "pending_items",
+          "expect": { "status": 200, "rowCount": 1, "rowsContain": [{ "id": "i2" }] }
+        },
+        {
+          "action": "named",
+          "as": "a",
+          "kind": "query",
+          "name": "all_items",
+          "expect": { "status": 200, "rowCount": 2, "rowsContain": [{ "id": "i1", "checked": 1, "checked_by_name": "AI" }, { "id": "i2", "checked": 0 }] }
+        },
+        {
+          "action": "named",
+          "as": "a",
+          "kind": "mutation",
+          "name": "uncheck_item",
+          "params": ["i1"],
+          "expect": { "status": 200 }
+        },
+        {
+          "action": "named",
+          "as": "a",
+          "kind": "query",
+          "name": "pending_items",
+          "expect": { "status": 200, "rowCount": 2, "rowsContain": [{ "id": "i1" }, { "id": "i2" }] }
+        }
+      ]
+    }
+  ]
+}
