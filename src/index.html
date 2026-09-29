@@ -250,7 +250,7 @@ async function processPendingInbox() {
       });
     }
     if (!newItems.length && !reviveIds.length) {
-      fetch(`${STORE}?key=pending_items`, { method: "DELETE" }).catch(() => {});
+      drainInbox(pending);
       return;
     }
 
@@ -272,9 +272,23 @@ async function processPendingInbox() {
       ).catch(() => {})),
     ]);
 
-    // Clear the inbox now that items are processed
-    fetch(`${STORE}?key=pending_items`, { method: "DELETE" }).catch(() => {});
+    // Remove exactly the entries we processed. A wholesale DELETE of the key
+    // here would also erase anything another app appended between our read
+    // above and now; array_remove is applied by the hub behind that append,
+    // so a line that arrived mid-drain is still waiting for the next load.
+    drainInbox(pending);
   } catch { /* non-fatal — don't block app load */ }
+}
+
+function drainInbox(processed) {
+  if (!processed.length) return;
+  fetch(STORE, {
+    method: "PATCH", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      key: "pending_items",
+      ops: processed.map(item => ({ op: "array_remove", path: "items", value: item })),
+    }),
+  }).catch(() => {});
 }
 
 // ── Actions ───────────────────────────────────────────────────────────────────

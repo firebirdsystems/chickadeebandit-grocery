@@ -116,6 +116,37 @@
     }
   },
   "exports": ["pending_items"],
+  "export_schemas": {
+    "pending_items": {
+      "description": "Inbox other apps append grocery lines to; Grocery drains it on load.",
+      "type": "object",
+      "required": [
+        "items"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "addedBy": {
+                "type": "string",
+                "maxLength": 120
+              }
+            }
+          }
+        }
+      }
+    }
+  },
   "contexts": ["household", "shared_space"],
   "data_access": {
     "reads": [
