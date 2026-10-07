@@ -146,7 +146,7 @@
 </div>
 
 <script type="module">
-import { memberColor, initial, esc, isAdult, hubConfirm, searchMatch } from "/hub-sdk.js";
+import { memberColor, initial, esc, isAdult, hubConfirm, searchMatch, glyph, chickadee } from "/hub-sdk.js";
 import { normalizeItem, isDuplicate, reviveTarget, sortItems, searchableFields } from "./logic.js";
 
 const CONTEXT    = window.__CONTEXT_URL ?? "";
@@ -439,8 +439,8 @@ function renderList() {
 
   function itemRow(item) {
     const btn = canWrite
-      ? `<button class="check-btn" data-id="${esc(item.id)}" title="${item.checked ? "Uncheck" : "Check off"}">✓</button>`
-      : `<div class="check-btn readonly" title="Sign in to check items">✓</div>`;
+      ? `<button class="check-btn" data-id="${esc(item.id)}" title="${item.checked ? "Uncheck" : "Check off"}" aria-label="${item.checked ? "Uncheck" : "Check off"}">${glyph("tick", { accent: "currentColor" })}</button>`
+      : `<div class="check-btn readonly" title="Sign in to check items">${glyph("tick", { accent: "currentColor" })}</div>`;
     const meta = item.checked && item.checked_by_name
       ? `<span class="item-meta">by ${esc(item.checked_by_name)}</span>`
       : `<span class="item-meta">${esc(item.added_by_name)}</span>`;
@@ -456,9 +456,9 @@ function renderList() {
 
   let listHtml = "";
   if (items.length === 0) {
-    listHtml = `<div class="empty">Nothing on the list yet — add the first item above.</div>`;
+    listHtml = `<div class="empty"><div style="margin-bottom:8px">${chickadee("nest", { size: 72 })}</div>Nothing on the list yet — add the first item above.</div>`;
   } else if (sorted.length === 0) {
-    listHtml = `<div class="empty">Nothing matches "${esc(searchQ)}".</div>`;
+    listHtml = `<div class="empty"><div style="margin-bottom:8px">${chickadee("searching", { size: 72 })}</div>Nothing matches "${esc(searchQ)}".</div>`;
   } else {
     if (unchecked.length > 0) {
       listHtml += `<div class="item-list">${unchecked.map(itemRow).join("")}</div>`;
