@@ -217,15 +217,16 @@ async function loadItems() {
 }
 
 // ── Pending inbox (cross-app writes from other apps) ─────────────────────────
+// Answers true when it wrote to the list, so the caller knows to read it again.
 async function processPendingInbox() {
-  if (!STORE) return;
+  if (!STORE) return false;
   try {
     const res = await fetch(`${STORE}?key=pending_items`);
-    if (!res.ok) return;
+    if (!res.ok) return false;
     const { value } = await res.json();
-    if (!value) return;
+    if (!value) return false;
     const pending = JSON.parse(value).items ?? [];
-    if (!pending.length) return;
+    if (!pending.length) return false;
 
     const now = new Date().toISOString();
     const newItems = [];
@@ -251,7 +252,7 @@ async function processPendingInbox() {
     }
     if (!newItems.length && !reviveIds.length) {
       drainInbox(pending);
-      return;
+      return false;
     }
 
     // Optimistic update: show new items immediately
@@ -277,7 +278,8 @@ async function processPendingInbox() {
     // above and now; array_remove is applied by the hub behind that append,
     // so a line that arrived mid-drain is still waiting for the next load.
     drainInbox(pending);
-  } catch { /* non-fatal — don't block app load */ }
+    return true;
+  } catch { return false; /* non-fatal — don't block app load */ }
 }
 
 function drainInbox(processed) {
@@ -546,8 +548,11 @@ document.getElementById("root").addEventListener("click", (e) => {
     };
   }
   render();
-  // Process cross-app inbox in background; re-render when done
-  processPendingInbox().then(async () => {
+  // Process the cross-app inbox in the background. The list is read again
+  // only when the inbox added to it: an empty inbox — the usual case — used
+  // to cost a second read of the whole list on every open.
+  processPendingInbox().then(async (changed) => {
+    if (!changed) return;
     await loadItems();
     render();
   }).catch(() => {});

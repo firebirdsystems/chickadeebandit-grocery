@@ -1,0 +1,524 @@
+{
+  "seed": [
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-4 hours'))",
+      "params": [
+        "pg-a0",
+        "Whole milk",
+        "whole milk",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-9 hours'))",
+      "params": [
+        "pg-a1",
+        "Eggs (dozen)",
+        "eggs (dozen)",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-14 hours'))",
+      "params": [
+        "pg-a2",
+        "Sourdough bread",
+        "sourdough bread",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-19 hours'))",
+      "params": [
+        "pg-a3",
+        "Bananas",
+        "bananas",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-24 hours'))",
+      "params": [
+        "pg-a4",
+        "Baby spinach",
+        "baby spinach",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-29 hours'))",
+      "params": [
+        "pg-a5",
+        "Cheddar cheese",
+        "cheddar cheese",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-34 hours'))",
+      "params": [
+        "pg-a6",
+        "Chicken thighs",
+        "chicken thighs",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-39 hours'))",
+      "params": [
+        "pg-a7",
+        "Ground turkey",
+        "ground turkey",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-44 hours'))",
+      "params": [
+        "pg-a8",
+        "Greek yogurt",
+        "greek yogurt",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-49 hours'))",
+      "params": [
+        "pg-a9",
+        "Blueberries",
+        "blueberries",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-54 hours'))",
+      "params": [
+        "pg-a10",
+        "Olive oil",
+        "olive oil",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-59 hours'))",
+      "params": [
+        "pg-a11",
+        "Spaghetti",
+        "spaghetti",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-64 hours'))",
+      "params": [
+        "pg-a12",
+        "Marinara sauce",
+        "marinara sauce",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-69 hours'))",
+      "params": [
+        "pg-a13",
+        "Black beans",
+        "black beans",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-74 hours'))",
+      "params": [
+        "pg-a14",
+        "Tortillas",
+        "tortillas",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-79 hours'))",
+      "params": [
+        "pg-a15",
+        "Avocados",
+        "avocados",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-84 hours'))",
+      "params": [
+        "pg-a16",
+        "Yellow onions",
+        "yellow onions",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-89 hours'))",
+      "params": [
+        "pg-a17",
+        "Garlic",
+        "garlic",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-94 hours'))",
+      "params": [
+        "pg-a18",
+        "Carrots",
+        "carrots",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-99 hours'))",
+      "params": [
+        "pg-a19",
+        "Honeycrisp apples",
+        "honeycrisp apples",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-104 hours'))",
+      "params": [
+        "pg-a20",
+        "Peanut butter",
+        "peanut butter",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-109 hours'))",
+      "params": [
+        "pg-a21",
+        "Oat milk",
+        "oat milk",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-114 hours'))",
+      "params": [
+        "pg-a22",
+        "Coffee beans",
+        "coffee beans",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-119 hours'))",
+      "params": [
+        "pg-a23",
+        "Butter",
+        "butter",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-124 hours'))",
+      "params": [
+        "pg-a24",
+        "Frozen peas",
+        "frozen peas",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-129 hours'))",
+      "params": [
+        "pg-a25",
+        "Dish soap",
+        "dish soap",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-134 hours'))",
+      "params": [
+        "pg-a26",
+        "Paper towels",
+        "paper towels",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-139 hours'))",
+      "params": [
+        "pg-a27",
+        "Granola bars",
+        "granola bars",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-144 hours'))",
+      "params": [
+        "pg-a28",
+        "Orange juice",
+        "orange juice",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-149 hours'))",
+      "params": [
+        "pg-a29",
+        "Cherry tomatoes",
+        "cherry tomatoes",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-154 hours'))",
+      "params": [
+        "pg-a30",
+        "Rice",
+        "rice",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-159 hours'))",
+      "params": [
+        "pg-a31",
+        "Salsa",
+        "salsa",
+        "{{me}}",
+        "Adam",
+        0
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, checked_by_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days'))",
+      "params": [
+        "pg-c0",
+        "Sandwich bread",
+        "sandwich bread",
+        "{{me}}",
+        "Adam",
+        1,
+        "Adam"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, checked_by_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days'))",
+      "params": [
+        "pg-c1",
+        "Strawberries",
+        "strawberries",
+        "{{me}}",
+        "Adam",
+        1,
+        "Adam"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, checked_by_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-4 days'))",
+      "params": [
+        "pg-c2",
+        "Cream cheese",
+        "cream cheese",
+        "{{me}}",
+        "Adam",
+        1,
+        "Adam"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, checked_by_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-4 days'))",
+      "params": [
+        "pg-c3",
+        "Bagels",
+        "bagels",
+        "{{me}}",
+        "Adam",
+        1,
+        "Adam"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, checked_by_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days'))",
+      "params": [
+        "pg-c4",
+        "Toothpaste",
+        "toothpaste",
+        "{{me}}",
+        "Adam",
+        1,
+        "Adam"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, checked_by_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days'))",
+      "params": [
+        "pg-c5",
+        "Laundry detergent",
+        "laundry detergent",
+        "{{me}}",
+        "Adam",
+        1,
+        "Adam"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, checked_by_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-6 days'))",
+      "params": [
+        "pg-c6",
+        "Lemons",
+        "lemons",
+        "{{me}}",
+        "Adam",
+        1,
+        "Adam"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, checked_by_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-6 days'))",
+      "params": [
+        "pg-c7",
+        "Broccoli",
+        "broccoli",
+        "{{me}}",
+        "Adam",
+        1,
+        "Adam"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, checked_by_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-7 days'))",
+      "params": [
+        "pg-c8",
+        "Parmesan",
+        "parmesan",
+        "{{me}}",
+        "Adam",
+        1,
+        "Adam"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, checked_by_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-7 days'))",
+      "params": [
+        "pg-c9",
+        "Chicken broth",
+        "chicken broth",
+        "{{me}}",
+        "Adam",
+        1,
+        "Adam"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, checked_by_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-8 days'))",
+      "params": [
+        "pg-c10",
+        "Cereal",
+        "cereal",
+        "{{me}}",
+        "Adam",
+        1,
+        "Adam"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, checked_by_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-8 days'))",
+      "params": [
+        "pg-c11",
+        "Trash bags",
+        "trash bags",
+        "{{me}}",
+        "Adam",
+        1,
+        "Adam"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, checked_by_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-9 days'))",
+      "params": [
+        "pg-c12",
+        "Cucumbers",
+        "cucumbers",
+        "{{me}}",
+        "Adam",
+        1,
+        "Adam"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, checked_by_name, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-9 days'))",
+      "params": [
+        "pg-c13",
+        "Hummus",
+        "hummus",
+        "{{me}}",
+        "Adam",
+        1,
+        "Adam"
+      ]
+    }
+  ]
+}
