@@ -325,6 +325,7 @@ async function addItem(rawName) {
       Object.assign(revive, prev);
       render();
       showError(`Could not add "${name}" — try again.`);
+      return false;
     }
     return;
   }
@@ -371,6 +372,7 @@ async function addItem(rawName) {
       showError(`"${name}" is already on the list.`);
     } else {
       showError("Could not add item — try again.");
+      return false;
     }
   }
 }
@@ -537,7 +539,13 @@ window.doAdd = async function() {
   input.value = "";
   const btn = document.querySelector('.add-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Adding…'; }
-  await addItem(val);
+  // addItem answers false when the hub refused the write: the list was redrawn
+  // without the item, so what was typed goes back in the (new) field to send again.
+  const saved = await addItem(val).catch(() => false);
+  if (saved === false) {
+    const again = document.getElementById("add-input");
+    if (again && !again.value) again.value = val;
+  }
   if (btn) { btn.disabled = false; btn.textContent = 'Add'; }
 };
 window.doClear  = () => clearChecked();
