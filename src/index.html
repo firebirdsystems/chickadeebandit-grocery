@@ -137,6 +137,8 @@
       background: var(--surface, var(--card, #fff)); color: var(--text, inherit);
     }
     .search-input:focus { outline: none; border-color: var(--accent, #6366f1); }
+    .load-error { margin: 0 0 12px; padding: 10px 14px; border-radius: 10px; background: var(--hub-tint-danger, #fee2e2); color: var(--hub-tint-danger-fg, #b91c1c); font-size: 0.9rem; display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+    .load-error-retry { background: none; border: 1px solid currentColor; border-radius: 8px; padding: 5px 10px; font: inherit; font-weight: 600; color: inherit; cursor: pointer; flex-shrink: 0; }
   </style>
 <base href="/run/grocery/">
 </head>
@@ -175,6 +177,7 @@ let members       = [];
 let currentMember = null;
 let items         = [];
 let searchQ = "";       // in-app search (see logic.js searchableFields)
+let loadFailed = false; // the first read of the list failed; nothing is known about it
 
 // ── DB ────────────────────────────────────────────────────────────────────────
 async function dbq(sql, params = []) {
@@ -184,8 +187,8 @@ async function dbq(sql, params = []) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ sql, params }),
   });
-  const json = await res.json();
-  if (json.error) throw new Error(json.error);
+  const json = await res.json().catch(() => null);
+  if (!res.ok || !json || typeof json !== "object" || json.error) throw new Error(json?.error || "Couldn’t reach the hub. Try again.");
   return json;
 }
 
@@ -205,10 +208,13 @@ async function loadMembers() {
     ];
     return;
   }
-  try {
-    const res = await fetch(`${CONTEXT}?keys=family.members`);
-    members = ((await res.json())["family.members"]) ?? [];
-  } catch { members = []; }
+  // A failed read throws: firstLoad shows the load banner, not a list with nobody in it.
+  const res = await fetch(`${CONTEXT}?keys=family.members`);
+  const data = await res.json().catch(() => null);
+  if (!res.ok || !data || typeof data !== "object" || data.error) throw new Error("Couldn’t reach the hub. Try again.");
+  // The hub answers 200 and names a key it could not resolve in $errors: that read failed too.
+  if (Array.isArray(data.$errors) && data.$errors.includes("family.members")) throw new Error("Couldn’t reach the hub. Try again.");
+  members = data["family.members"] ?? [];
 }
 
 async function loadItems() {
@@ -317,8 +323,8 @@ async function addItem(rawName) {
       render();
     } catch {
       Object.assign(revive, prev);
-      showError(`Could not add "${name}" — try again.`);
       render();
+      showError(`Could not add "${name}" — try again.`);
     }
     return;
   }
@@ -359,13 +365,13 @@ async function addItem(rawName) {
   } catch (e) {
     // Roll back the optimistic item on failure.
     items = items.filter(i => i.id !== tempId);
+    render();
     // UNIQUE constraint → already exists (race condition)
     if (e.message?.includes("UNIQUE") || e.message?.includes("unique")) {
       showError(`"${name}" is already on the list.`);
     } else {
       showError("Could not add item — try again.");
     }
-    render();
   }
 }
 
@@ -374,6 +380,7 @@ async function toggleCheck(itemId) {
   const item = items.find(i => i.id === itemId);
   if (!item) return;
   const wasChecked = item.checked;
+  const prevCheckedBy = item.checked_by_name;
   const next = wasChecked ? 0 : 1;
 
   // Optimistic update: reflect change immediately before DB write
@@ -389,8 +396,9 @@ async function toggleCheck(itemId) {
   } catch {
     // Revert on failure
     item.checked = wasChecked;
-    item.checked_by_name = wasChecked ? item.checked_by_name : null;
+    item.checked_by_name = prevCheckedBy;
     render();
+    showError("Could not update that item. Try again.");
   }
 }
 
@@ -410,14 +418,20 @@ async function clearChecked() {
       await dbq(`DELETE FROM app_grocery__items WHERE checked = 1`);
     } catch {
       items = [...items, ...removed];
-      showError("Could not clear checked items — try again.");
       render();
+      showError("Could not clear checked items — try again.");
     }
   })();
 }
 
 // ── Rendering ─────────────────────────────────────────────────────────────────
 function renderList() {
+  // An unread list is not an empty one: no empty state, and no add bar, whose
+  // duplicate check would be running against nothing.
+  if (loadFailed) {
+    document.getElementById("root").innerHTML = `<div class="load-error" data-testid="load-error" role="alert"><span>Couldn’t load the list.</span> <button type="button" class="load-error-retry" data-testid="load-retry">Try again</button></div>`;
+    return;
+  }
   const sorted   = searchQ
     ? sortItems(items).filter(i => searchMatch(searchQ, searchableFields(i)))
     : sortItems(items);
@@ -533,21 +547,23 @@ window.doClear  = () => clearChecked();
 // raw /api/db. Keeping the id in a data-* attribute + delegation (never an inline
 // onclick JS string) prevents stored XSS. #root persists across re-renders.
 document.getElementById("root").addEventListener("click", (e) => {
+  if (e.target.closest('[data-testid="load-retry"]')) { firstLoad(); return; }
   const b = e.target.closest(".check-btn:not(.readonly)");
   if (b?.dataset.id) toggleCheck(b.dataset.id);
 });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-(async () => {
-  await loadMembers();
+async function firstLoad() {
+  loadFailed = await loadMembers().then(() => false, () => true);
   await setup();
-  await loadItems();
   if (HUB_MEMBER) {
     currentMember = members.find(m => m.id === HUB_MEMBER.id) ?? {
       id: HUB_MEMBER.id, name: HUB_MEMBER.name, role: HUB_MEMBER.role,
     };
   }
+  if (!loadFailed) loadFailed = await loadItems().then(() => false, () => true);
   render();
+  if (loadFailed) return;
   // Process the cross-app inbox in the background. The list is read again
   // only when the inbox added to it: an empty inbox — the usual case — used
   // to cost a second read of the whole list on every open.
@@ -556,7 +572,8 @@ document.getElementById("root").addEventListener("click", (e) => {
     await loadItems();
     render();
   }).catch(() => {});
-})();
+}
+firstLoad();
 </script>
 </body>
 </html>
