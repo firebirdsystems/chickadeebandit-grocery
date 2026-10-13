@@ -188,7 +188,12 @@ async function dbq(sql, params = []) {
     body: JSON.stringify({ sql, params }),
   });
   const json = await res.json().catch(() => null);
-  if (!res.ok || !json || typeof json !== "object" || json.error) throw new Error(json?.error || "Couldn’t reach the hub. Try again.");
+  if (!res.ok || !json || typeof json !== "object" || json.error) {
+    const err = new Error(json?.error || "Couldn’t reach the hub. Try again.");
+    err.status = res.status;
+    err.code = json?.code; // e.g. "UNIQUE_CONSTRAINT" for a duplicate row
+    throw err;
+  }
   return json;
 }
 
@@ -368,7 +373,8 @@ async function addItem(rawName) {
     items = items.filter(i => i.id !== tempId);
     render();
     // UNIQUE constraint → already exists (race condition)
-    if (e.message?.includes("UNIQUE") || e.message?.includes("unique")) {
+    // The hub names it with a code; the SQLite text is the fallback for a hub that predates it.
+    if (e?.code === "UNIQUE_CONSTRAINT" || /UNIQUE constraint failed/i.test(e?.message ?? "")) {
       showError(`"${name}" is already on the list.`);
     } else {
       showError("Could not add item — try again.");
