@@ -159,7 +159,6 @@
     "requires_approval": false
   },
   "resource_limits": {
-    "max_db_bytes": 52428800,
     "max_store_bytes": 262144,
     "max_store_reads_per_day": 1000,
     "max_store_writes_per_day": 500
