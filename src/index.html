@@ -383,8 +383,15 @@ async function addItem(rawName) {
     added_by_id: currentMember.id,
   });
   // A failed re-read keeps the row already drawn, under the id it was stored with.
+  // An overlapping add's re-read may have dropped the temp row (or already
+  // brought this one back under its id), so it is put back by id, not renamed.
   await loadItems().catch(() => {
-    items = items.map(i => i.id === tempId ? { ...i, id } : i);
+    if (items.some(i => i.id === id)) { items = items.filter(i => i.id !== tempId); return; }
+    const temp = items.find(i => i.id === tempId);
+    items = temp
+      ? items.map(i => i === temp ? { ...i, id } : i)
+      : [...items, { id, name, name_normalized: normalized, added_by_id: currentMember.id,
+          added_by_name: currentMember.name, checked: false, checked_by_name: null, created_at: new Date().toISOString() }];
   });
   render();
 }
