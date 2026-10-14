@@ -324,14 +324,15 @@ async function addItem(rawName) {
         `UPDATE app_grocery__items SET checked = 0, checked_by_name = NULL, created_at = ? WHERE id = ?`,
         [new Date().toISOString(), revive.id]
       );
-      await loadItems();
-      render();
     } catch {
       Object.assign(revive, prev);
       render();
       showError(`Could not add "${name}" — try again.`);
       return false;
     }
+    // The revive is stored: a failed re-read leaves the row as drawn above.
+    await loadItems().catch(() => {});
+    render();
     return;
   }
 
@@ -352,22 +353,14 @@ async function addItem(rawName) {
   }];
   render();
 
+  const id = crypto.randomUUID();
   try {
     await dbq(
       `INSERT INTO app_grocery__items (id, name, name_normalized, added_by_id, added_by_name, checked, created_at)
        VALUES (?, ?, ?, ?, ?, 0, ?)`,
-      [crypto.randomUUID(), name, normalized,
+      [id, name, normalized,
        currentMember.id, currentMember.name, new Date().toISOString()]
     );
-    // Published only from the member-typed add, never from processPendingInbox:
-    // draining the inbox would re-emit items another app just sent here, and a
-    // grocery -> pantry -> grocery rule pair would loop.
-    await publishEvent("grocery.item_added", normalized, {
-      name,
-      added_by_id: currentMember.id,
-    });
-    await loadItems();
-    render();
   } catch (e) {
     // Roll back the optimistic item on failure.
     items = items.filter(i => i.id !== tempId);
@@ -376,11 +369,24 @@ async function addItem(rawName) {
     // The hub names it with a code; the SQLite text is the fallback for a hub that predates it.
     if (e?.code === "UNIQUE_CONSTRAINT" || /UNIQUE constraint failed/i.test(e?.message ?? "")) {
       showError(`"${name}" is already on the list.`);
-    } else {
-      showError("Could not add item — try again.");
-      return false;
+      return;
     }
+    showError("Could not add item — try again.");
+    return false;
   }
+  // The item is stored from here on: nothing below may report the add as failed.
+  // Published only from the member-typed add, never from processPendingInbox:
+  // draining the inbox would re-emit items another app just sent here, and a
+  // grocery -> pantry -> grocery rule pair would loop.
+  await publishEvent("grocery.item_added", normalized, {
+    name,
+    added_by_id: currentMember.id,
+  });
+  // A failed re-read keeps the row already drawn, under the id it was stored with.
+  await loadItems().catch(() => {
+    items = items.map(i => i.id === tempId ? { ...i, id } : i);
+  });
+  render();
 }
 
 async function toggleCheck(itemId) {
