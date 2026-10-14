@@ -387,6 +387,9 @@ async function addItem(rawName) {
   // brought this one back under its id), so it is put back by id, not renamed.
   await loadItems().catch(() => {
     if (items.some(i => i.id === id)) { items = items.filter(i => i.id !== tempId); return; }
+    // Cleared meanwhile (an overlapping re-read brought it in under its id, and
+    // it was checked off and cleared): it is gone, not to be drawn back.
+    if (clearedIds.has(id)) { items = items.filter(i => i.id !== tempId); return; }
     const temp = items.find(i => i.id === tempId);
     items = temp
       ? items.map(i => i === temp ? { ...i, id } : i)
@@ -423,12 +426,16 @@ async function toggleCheck(itemId) {
   }
 }
 
+// Ids a Clear removed: an add still waiting on its re-read must not draw one back.
+const clearedIds = new Set();
+
 async function clearChecked() {
   if (!currentMember) return;
   if (!await hubConfirm({ message: "Remove all checked items?", confirmLabel: "Clear checked" })) return;
 
   // Optimistic: remove checked items immediately, restore on failure.
   const removed = items.filter(i => i.checked);
+  for (const i of removed) clearedIds.add(i.id);
   items = items.filter(i => !i.checked);
   render();
 
