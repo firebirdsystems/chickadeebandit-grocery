@@ -2,12 +2,12 @@
 
 A [Chickadee Bandit](https://chickadeebandit.com/app-library/grocery) app.
 
-A shared household grocery list. Anyone can add items; adults check things off. Items are kept alphabetical and automatically deduplicated.
+A shared household grocery list. Any member can add items and check them off. Items are kept alphabetical and automatically deduplicated.
 
 ## Features
 
 - Anyone in the family can add items
-- Adults and admins check items off
+- Any member checks items off
 - Auto-alphabetical sort — unchecked items first
 - Duplicate detection (case-insensitive, whitespace-normalized)
 
